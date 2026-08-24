@@ -216,6 +216,9 @@ app.post('/api/game/end', async (req, res) => {
     const session = activeGames.get(gameId);
     if (!session) return res.status(404).json({ error: 'Session not found.' });
 
+    // Grab the secret code before deleting the session
+    const secretCode = session.secret.join(''); 
+
     const user = await User.findOne({ username: session.username });
     let isNewBest = false;
 
@@ -248,12 +251,12 @@ app.post('/api/game/end', async (req, res) => {
     }
 
     activeGames.delete(gameId);
-    res.json({ success: true, user, isNewBest });
+    // Send the secret code back to the frontend
+    res.json({ success: true, user, isNewBest, secretCode });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update user stats.' });
   }
 });
-
 // Reveal Power
 app.post('/api/game/power/reveal', async (req, res) => {
   try {
